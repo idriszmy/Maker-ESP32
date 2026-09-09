@@ -42,8 +42,10 @@ Kedua-dua cara aktif tanpa butang tukar mode. **D-pad mendapat keutamaan** apabi
 ditekan. Apabila dilepaskan, robot kembali mengikut kedudukan analog semasa;
 jika analog masih ditolak, robot terus bergerak mengikut analog tersebut.
 
-D-pad menggunakan kira-kira **50% PWM** secara default. Tahan **R2 bersama D-pad**
-untuk menggunakan **100% PWM**. R2 tidak mengubah kawalan analog.
+D-pad bermula pada kira-kira **50% PWM**. Semasa menahan arah D-pad, trigger analog
+R2 menaikkan kelajuan secara berterusan dari **50% hingga 100%**: dilepaskan ialah
+50%, ditekan separuh kira-kira 75%, dan ditekan penuh ialah 100%. R2 tidak
+mengubah kawalan analog.
 
 ### 1. D-pad kiri: lapan arah
 
@@ -131,20 +133,21 @@ atau komputer lama, matikan sambungan tersebut dan cuba pairing SHARE + PS lagi.
 | Constant | Default | Kegunaan |
 |---|---|---|
 | `MAX_PWM` | 255 | Had PWM analog, 100% duty |
-| `DPAD_PWM` | 128 | PWM biasa D-pad, kira-kira 50%; R2 guna `MAX_PWM` |
+| `DPAD_PWM` | 128 | PWM minimum D-pad, kira-kira 50% |
+| `R2_LIMIT` | 1023 | Nilai maksimum analog R2 untuk 100% PWM D-pad |
 | `AXIS_DEADBAND` | 40 | Toleransi sekitar tengah joystick, julat paksi ±512 |
 | `INPUT_TIMEOUT_MS` | 300 | Had masa tanpa data baru |
 | `NEUTRAL_HOLD_MS` | 300 | Tempoh neutral sebelum ready |
 | `INVERT_RIGHT` | false | Songsangkan arah motor kanan |
 | `INVERT_LEFT` | false | Songsangkan arah motor kiri |
 
-D-pad menggunakan kira-kira 50% PWM secara biasa dan PWM penuh semasa R2 ditahan.
-Analog menggunakan lengkung kuasa dua: separuh daripada julat joystick yang boleh
-digunakan menghasilkan kira-kira 25% PWM, manakala gerakan penuh menghasilkan
-100%. Peratus PWM bukan jaminan peratus kelajuan fizikal.
-Jika motor tidak mula berpusing pada PWM rendah, periksa bekalan, beban dan
-mekanikal sebelum menambah input analog. Kod
-menggunakan deadband yang diskalakan semula, tanpa minimum-PWM jump atau ramp.
+D-pad berubah secara linear dari kira-kira 50% hingga 100% PWM mengikut nilai
+analog R2. Analog joystick menggunakan lengkung kuasa dua: separuh daripada julat
+joystick yang boleh digunakan menghasilkan kira-kira 25% PWM, manakala gerakan
+penuh menghasilkan 100%. Peratus PWM bukan jaminan peratus kelajuan fizikal. Jika
+motor tidak mula berpusing pada PWM rendah, periksa bekalan, beban dan mekanikal
+sebelum menambah input analog. Kod menggunakan deadband yang diskalakan semula,
+tanpa minimum-PWM jump atau ramp.
 
 ## Ujian pada robot
 
@@ -160,7 +163,7 @@ menggunakan deadband yang diskalakan semula, tanpa minimum-PWM jump atau ramp.
    dan reconnect dengan input ditahan tidak terus menggerakkan motor.
 7. Uji perlahan di lantai; semak drift, arus/bekalan, motor panas, reset/brownout,
    respons Bluetooth dan jarak berhenti. Uji kelajuan biasa D-pad dahulu, kemudian
-   tahan R2 untuk menguji 100% PWM.
+   tekan R2 secara beransur-ansur dan pastikan kelajuan meningkat lancar ke 100% PWM.
 
 ## Validation
 
@@ -171,8 +174,8 @@ Disahkan pada 9 September 2026:
 - FQBN: `esp32-bluepad32:esp32:esp32:FlashSize=8M,PartitionScheme=huge_app`.
 - Sketch: **719281 bytes**, global RAM: **87228 bytes**.
 - **Host logic tests lulus:** lapan arah D-pad dan kombinasi tidak sah, deadband,
-  lengkung kuasa dua analog, had output, mixing, D-pad priority, release-to-stop tanpa Cross,
-  neutral arming, Cross stop,
+  interpolasi kelajuan analog R2, lengkung kuasa dua analog joystick, had output,
+  mixing, D-pad priority, release-to-stop tanpa Cross, neutral arming, Cross stop,
   timeout termasuk laporan baru selepas sela panjang, controller ownership dan
   `millis()` rollover.
 - Pengendalian sambungan mengikut contoh rasmi Bluepad32 dengan menyimpan callback

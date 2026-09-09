@@ -7,7 +7,8 @@ constexpr uint8_t RIGHT_B = 13;
 constexpr uint8_t LEFT_A = 14;
 constexpr uint8_t LEFT_B = 27;
 constexpr int MAX_PWM = 255;        // Full PWM range.
-constexpr int DPAD_PWM = 128;       // About 50%; hold R2 for MAX_PWM.
+constexpr int DPAD_PWM = 128;       // About 50%; analog R2 raises it to MAX_PWM.
+constexpr int R2_LIMIT = 1023;
 constexpr int AXIS_LIMIT = 512;
 constexpr int AXIS_DEADBAND = 40;
 constexpr uint32_t INPUT_TIMEOUT_MS = 300;
@@ -81,6 +82,11 @@ void driveDpad(uint8_t dpad, int speed) {
   }
 }
 
+int dpadSpeed(ControllerPtr ctl) {
+  const int r2 = constrain(ctl->throttle(), 0, R2_LIMIT);
+  return DPAD_PWM + (r2 * (MAX_PWM - DPAD_PWM)) / R2_LIMIT;
+}
+
 void driveAnalog(ControllerPtr ctl) {
   const int throttle = axisToPwm(-ctl->axisY());
   const int steering = axisToPwm(ctl->axisRX());
@@ -123,7 +129,7 @@ void processInput(ControllerPtr ctl, uint32_t now) {
 
   // D-pad takes priority; release it to return to the current stick inputs.
   if (ctl->dpad() != 0) {
-    driveDpad(ctl->dpad(), ctl->r2() ? MAX_PWM : DPAD_PWM);
+    driveDpad(ctl->dpad(), dpadSpeed(ctl));
   }
   else driveAnalog(ctl);
 }

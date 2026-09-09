@@ -44,6 +44,16 @@ int main() {
   assert(axisToPwm(AXIS_LIMIT) == MAX_PWM);
 
   Controller ctl;
+  ctl.trigger = -20;
+  assert(dpadSpeed(&ctl) == DPAD_PWM);
+  ctl.trigger = 512;
+  assert(dpadSpeed(&ctl) == 191);
+  ctl.trigger = 1023;
+  assert(dpadSpeed(&ctl) == MAX_PWM);
+  ctl.trigger = 1200;
+  assert(dpadSpeed(&ctl) == MAX_PWM);
+  ctl.trigger = 0;
+
   ctl.leftY = -512;
   driveAnalog(&ctl);
   expectMotors(255, 255);
@@ -87,10 +97,13 @@ int main() {
   ctl.directions = DPAD_LEFT;
   report(ctl, 520);
   expectMotors(-128, 128);  // D-pad overrides the held forward stick at 50%.
-  ctl.boost = true;
+  ctl.trigger = 512;
   report(ctl, 521);
-  expectMotors(-255, 255);  // Holding R2 boosts D-pad movement to 100%.
-  ctl.boost = false;
+  expectMotors(-191, 191);  // Half R2 gives about 75% D-pad speed.
+  ctl.trigger = 1023;
+  report(ctl, 522);
+  expectMotors(-255, 255);  // Full R2 gives 100% D-pad speed.
+  ctl.trigger = 0;
   ctl.directions = 0;
   report(ctl, 530);
   expectMotors(255, 255);   // Releasing D-pad returns to live analog inputs.

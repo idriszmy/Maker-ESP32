@@ -18,12 +18,13 @@ constexpr uint8_t DPAD_UP = 1, DPAD_DOWN = 2, DPAD_RIGHT = 4, DPAD_LEFT = 8;
 struct Controller {
   int leftY = 0, rightX = 0;
   uint8_t directions = 0;
-  bool connected = true, fresh = true, cross = false, boost = false, physicalGamepad = true;
+  int trigger = 0;
+  bool connected = true, fresh = true, cross = false, physicalGamepad = true;
   uint8_t dpad() const { return directions; }
   int axisY() const { return leftY; }
   int axisRX() const { return rightX; }
   bool a() const { return cross; }
-  bool r2() const { return boost; }
+  int throttle() const { return trigger; }
   bool isGamepad() const { return physicalGamepad; }
   bool isConnected() const { return connected; }
   bool hasData() const { return fresh; }

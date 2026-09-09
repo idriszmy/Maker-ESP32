@@ -43,8 +43,10 @@ priority** while pressed. Releasing it returns control to the current stick
 positions; if a stick is still deflected, the robot continues moving according
 to that input.
 
-The D-pad runs at about **50% PWM** by default. Hold **R2 together with the D-pad**
-for **100% PWM**. R2 does not change analog-stick control.
+The D-pad starts at about **50% PWM**. While holding a D-pad direction, the analog
+R2 trigger raises its speed continuously from **50% to 100%**: released is 50%,
+half-pressed is about 75%, and fully pressed is 100%. R2 does not change
+analog-stick control.
 
 ### 1. Left D-pad: eight directions
 
@@ -132,20 +134,21 @@ previous console or computer, disconnect it there and try SHARE + PS pairing aga
 | Constant | Default | Purpose |
 |---|---|---|
 | `MAX_PWM` | 255 | Analog PWM limit, 100% duty |
-| `DPAD_PWM` | 128 | Normal D-pad PWM, about 50%; R2 uses `MAX_PWM` |
+| `DPAD_PWM` | 128 | Minimum D-pad PWM, about 50% |
+| `R2_LIMIT` | 1023 | Full-scale analog R2 value used for 100% D-pad PWM |
 | `AXIS_DEADBAND` | 40 | Tolerance around stick center, axis range ±512 |
 | `INPUT_TIMEOUT_MS` | 300 | Maximum time without new data |
 | `NEUTRAL_HOLD_MS` | 300 | Neutral period before becoming ready |
 | `INVERT_RIGHT` | false | Reverse the right motor direction |
 | `INVERT_LEFT` | false | Reverse the left motor direction |
 
-The D-pad uses about 50% PWM normally and full PWM while R2 is held. Analog input
-uses a squared curve: halfway through the usable stick travel produces about 25%
-PWM, while full travel produces 100%. PWM percentage does not guarantee a matching
-percentage of physical
-speed. If a motor does not start at low PWM, check the supply, load, and mechanics
-before increasing the analog input. The code rescales the input after the deadband,
-without a minimum-PWM jump or ramp.
+The D-pad varies linearly from about 50% to 100% PWM according to the analog R2
+value. Analog-stick input uses a squared curve: halfway through the usable stick
+travel produces about 25% PWM, while full travel produces 100%. PWM percentage
+does not guarantee a matching percentage of physical speed. If a motor does not
+start at low PWM, check the supply, load, and mechanics before increasing the
+analog input. The code rescales the input after the deadband, without a
+minimum-PWM jump or ramp.
 
 ## Testing on the robot
 
@@ -161,7 +164,7 @@ without a minimum-PWM jump or ramp.
    motors stop and reconnecting with a held input does not immediately move them.
 7. Test slowly on the floor; check drift, current/supply, motor heating, resets or
    brownouts, Bluetooth response, and stopping distance. Test normal D-pad speed
-   first, then hold R2 to test 100% PWM.
+   first, then press R2 gradually and confirm speed rises smoothly to 100% PWM.
 
 ## Validation
 
@@ -172,9 +175,9 @@ Verified on 9 September 2026:
 - FQBN: `esp32-bluepad32:esp32:esp32:FlashSize=8M,PartitionScheme=huge_app`.
 - Sketch: **719281 bytes**, global RAM: **87228 bytes**.
 - **Host logic tests passed:** eight D-pad directions and invalid combinations,
-  deadband, squared analog response, output limits, mixing, D-pad priority,
-  release-to-stop without
-  Cross, neutral arming, Cross stop, timeout including a new report after a long
+  analog R2 speed interpolation, deadband, squared analog-stick response, output
+  limits, mixing, D-pad priority, release-to-stop without Cross, neutral arming,
+  Cross stop, timeout including a new report after a long
   gap, controller ownership, and `millis()` rollover.
 - Connection handling follows the official Bluepad32 example by retaining the
   first callback without filtering its class before DS4 setup has completed.
