@@ -85,8 +85,8 @@ atas + bawah dihentikan oleh kod.
 - Syarat neutral yang sama digunakan selepas startup, reconnect atau timeout.
 - Tiada data baru daripada controller aktif selama **300 ms**: motor dihentikan.
 - Controller disconnect: motor dihentikan apabila disconnect dikesan.
-- Hanya satu gamepad diterima; gamepad tambahan ditolak. Virtual mouse daripada
-  touchpad DS4 dimatikan dan diabaikan dengan selamat jika masih dilaporkan.
+- Controller pertama yang bersambung mengawal robot. Callback controller tambahan
+  atau touchpad DS4 diabaikan tanpa memutuskan controller aktif.
 - Tidak perlu tahan R1 untuk memandu.
 
 Stop bermaksud output PWM menjadi sifar. Roda mungkin masih bergerak kerana
@@ -168,8 +168,8 @@ Disahkan pada 9 September 2026:
   neutral arming, Cross stop,
   timeout termasuk laporan baru selepas sela panjang, controller ownership dan
   `millis()` rollover.
-- Pendaftaran virtual touchpad DS4 diabaikan tanpa memutuskan gamepad induk.
-  Ini mengelakkan sambungan lampu biru sekejap yang berlaku pada build pertama.
+- Pengendalian sambungan mengikut contoh rasmi Bluepad32 dengan menyimpan callback
+  pertama tanpa menapis kelas device sebelum proses setup DS4 selesai.
 - **Belum diuji pada hardware:** upload ke board, pairing PS4, arah motor,
   prestasi bekalan dan masa berhenti sebenar.
 

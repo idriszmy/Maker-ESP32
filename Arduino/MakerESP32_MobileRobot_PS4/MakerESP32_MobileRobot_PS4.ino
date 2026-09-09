@@ -124,15 +124,11 @@ void processInput(ControllerPtr ctl, uint32_t now) {
 }
 
 void onConnectedController(ControllerPtr ctl) {
-  // A DS4 touchpad can appear as a virtual mouse. Ignore it without calling
-  // disconnect(), because disconnecting the child can also drop the gamepad.
-  if (!ctl->isGamepad()) return;
+  // Follow the official Bluepad32 example: retain the first controller in the
+  // callback without filtering its class. Some DS4 connections only finish
+  // populating their gamepad data after this callback returns.
+  if (gamepad != nullptr) return;
 
-  // One physical gamepad owns the robot; reject additional gamepads.
-  if (gamepad != nullptr) {
-    ctl->disconnect();
-    return;
-  }
   disarm();
   gamepad = ctl;
   lastInputMs = millis();
@@ -149,7 +145,6 @@ void onDisconnectedController(ControllerPtr ctl) {
 void setup() {
   stopMotors();
   Serial.begin(115200);
-  BP32.enableVirtualDevice(false);  // PS4 touchpad must not become a second device.
   BP32.setup(&onConnectedController, &onDisconnectedController);
   // Keep Bluetooth keys across resets; do not forget keys on every boot.
   Serial.println("Pair PS4: hold SHARE + PS until the light bar flashes.");
@@ -159,7 +154,7 @@ void loop() {
   const bool updated = BP32.update();
   const uint32_t now = millis();
 
-  if (gamepad == nullptr || !gamepad->isConnected()) {
+  if (gamepad == nullptr || !gamepad->isConnected() || !gamepad->isGamepad()) {
     disarm();
   } else {
     // Check the gap BEFORE accepting a new report, including after a loop stall.

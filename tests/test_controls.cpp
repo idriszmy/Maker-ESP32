@@ -146,11 +146,11 @@ int main() {
 
   Controller extra;
   onConnectedController(&extra);
-  assert(!extra.connected && gamepad == &ctl);
+  assert(extra.connected && gamepad == &ctl);
   onDisconnectedController(&extra);
   assert(gamepad == &ctl);
 
-  // Ignore a DS4 virtual touchpad without disconnecting it or its parent.
+  // Ignore a DS4 virtual touchpad callback without disconnecting either device.
   Controller touchpad;
   touchpad.physicalGamepad = false;
   onConnectedController(&touchpad);
@@ -161,6 +161,19 @@ int main() {
   onDisconnectedController(&ctl);
   expectMotors(0, 0);
   assert(!armed && gamepad == nullptr);
+
+  // Match Bluepad32's callback timing: retain first, then wait for gamepad data.
+  Controller pending;
+  pending.physicalGamepad = false;
+  onConnectedController(&pending);
+  report(pending, 1940);
+  expectMotors(0, 0);
+  pending.physicalGamepad = true;
+  report(pending, 1950);
+  report(pending, 2100);
+  report(pending, 2250);
+  assert(armed);
+  onDisconnectedController(&pending);
 
   // Timeout subtraction must remain correct across millis() rollover.
   testClock = UINT32_MAX - 200;
