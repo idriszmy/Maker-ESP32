@@ -31,7 +31,8 @@ Untuk Robo ESP32, gunakan bateri LiPo/Li-ion **1 sel** melalui connector bateri
 yang sesuai, atau **3.6–6V pada terminal VIN Robo ESP32**. Voltan motor mengikut
 bekalan board. Jangan sambung bateri 2S terus. Had ini merujuk kepada Robo ESP32,
 bukan pin bekalan pada Maker ESP32. Padankan voltan dan arus stall motor dengan
-rating driver/bekalan; model motor dan bateri projek ini belum disahkan.
+rating driver/bekalan. Pengguna menggunakan bateri 6V dan motor TT; model tepat
+dan arus stall motor belum disahkan.
 
 ## Kawalan
 
@@ -72,7 +73,11 @@ atas + bawah dihentikan oleh kod.
 
 ### Stop dan mula bergerak
 
-- **Cross (×)** menghentikan output motor dan membatalkan keadaan ready.
+- **Stop biasa:** lepaskan D-pad dan kembalikan analog ke neutral. Output motor
+  terus menjadi sifar pada laporan input berikutnya; tidak perlu tekan Cross
+  atau tunggu 300 ms untuk berhenti. Robot kekal ready.
+- **Cross (×)** ialah stop tambahan yang mengatasi input lain, walaupun joystick
+  masih ditolak. Ia menghentikan output motor dan membatalkan keadaan ready.
 - Untuk kembali ready: lepaskan Cross, lepaskan D-pad dan neutralkan kedua-dua
   paksi analog yang digunakan selama **300 ms** dengan data controller diterima.
 - Syarat neutral yang sama digunakan selepas startup, reconnect atau timeout.
@@ -118,16 +123,18 @@ atau komputer lama, matikan sambungan tersebut dan cuba pairing SHARE + PS lagi.
 
 | Constant | Default | Kegunaan |
 |---|---|---|
-| `MAX_PWM` | 102 | Had PWM analog, 40% duty daripada 255 |
-| `DPAD_PWM` | 102 | PWM tetap D-pad; mesti tidak melebihi `MAX_PWM` |
+| `MAX_PWM` | 255 | Had PWM analog, 100% duty |
+| `DPAD_PWM` | 255 | PWM tetap D-pad; mesti tidak melebihi `MAX_PWM` |
 | `AXIS_DEADBAND` | 40 | Toleransi sekitar tengah joystick, julat paksi ±512 |
 | `INPUT_TIMEOUT_MS` | 300 | Had masa tanpa data baru |
 | `NEUTRAL_HOLD_MS` | 300 | Tempoh neutral sebelum ready |
 | `INVERT_RIGHT` | false | Songsangkan arah motor kanan |
 | `INVERT_LEFT` | false | Songsangkan arah motor kiri |
 
-PWM 40% bukan jaminan 40% kelajuan fizikal. Jika motor tidak mula berpusing pada
-PWM rendah, periksa bekalan, beban dan mekanikal sebelum menaikkan had. Kod
+D-pad menggunakan PWM penuh; analog masih mengawal PWM secara proportional
+dari sifar hingga maksimum. Peratus PWM bukan jaminan peratus kelajuan fizikal.
+Jika motor tidak mula berpusing pada PWM rendah, periksa bekalan, beban dan
+mekanikal sebelum menambah input analog. Kod
 menggunakan deadband yang diskalakan semula, tanpa minimum-PWM jump atau ramp.
 
 ## Ujian pada robot
@@ -143,7 +150,8 @@ menggunakan deadband yang diskalakan semula, tanpa minimum-PWM jump atau ramp.
 6. Matikan controller semasa memandu dengan roda terangkat. Semak motor berhenti
    dan reconnect dengan input ditahan tidak terus menggerakkan motor.
 7. Uji perlahan di lantai; semak drift, arus/bekalan, motor panas, reset/brownout,
-   respons Bluetooth dan jarak berhenti sebelum menaikkan kelajuan.
+   respons Bluetooth dan jarak berhenti. D-pad menggunakan 100% PWM; gunakan
+   analog dengan input kecil untuk ujian perlahan.
 
 ## Validation
 
@@ -152,9 +160,10 @@ Disahkan pada 9 September 2026:
 - **Compile ESP32 lulus:** `esp32-bluepad32:esp32@4.1.0` dan
   `Cytron Motor Drivers Library@1.0.1`.
 - FQBN: `esp32-bluepad32:esp32:esp32:FlashSize=8M,PartitionScheme=huge_app`.
-- Sketch: **719433 bytes**, global RAM: **87228 bytes**.
+- Sketch: **719417 bytes**, global RAM: **87228 bytes**.
 - **Host logic tests lulus:** lapan arah D-pad dan kombinasi tidak sah, deadband,
-  had output analog, mixing, D-pad priority, neutral arming, Cross stop,
+  had output analog, mixing, D-pad priority, release-to-stop tanpa Cross,
+  neutral arming, Cross stop,
   timeout termasuk laporan baru selepas sela panjang, controller ownership dan
   `millis()` rollover.
 - **Belum diuji pada hardware:** upload ke board, pairing PS4, arah motor,
