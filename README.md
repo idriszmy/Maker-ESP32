@@ -1,9 +1,11 @@
 # Maker ESP32
 
-Projek Arduino untuk **Maker ESP32 + Robo ESP32**. Sketch pertama ialah mobile
-robot dua motor DC yang dikawal menggunakan controller PS4 / DualShock 4.
+**English** | [Bahasa Melayu](README.ms.md)
 
-## Struktur projek
+Arduino projects for **Maker ESP32 + Robo ESP32**. The first sketch controls a
+mobile robot with two DC motors using a PS4 / DualShock 4 controller.
+
+## Project structure
 
 ```text
 Arduino/
@@ -14,162 +16,162 @@ tests/
   stubs/
 ```
 
-## Hardware dan sambungan
+## Hardware and connections
 
-| Komponen | Sambungan | GPIO |
+| Component | Connection | GPIO |
 |---|---|---|
-| Motor kanan | Robo ESP32 MOTOR1 | A = 12, B = 13 |
-| Motor kiri | Robo ESP32 MOTOR2 | A = 14, B = 27 |
-| Maker ESP32 | Soket ESP32 pada Robo ESP32 | Ikut orientasi board |
-| PS4 / DualShock 4 | Bluetooth terus ke Maker ESP32 | Tiada receiver USB |
+| Right motor | Robo ESP32 MOTOR1 | A = 12, B = 13 |
+| Left motor | Robo ESP32 MOTOR2 | A = 14, B = 27 |
+| Maker ESP32 | ESP32 socket on Robo ESP32 | Follow the board orientation |
+| PS4 / DualShock 4 | Bluetooth directly to Maker ESP32 | No USB receiver |
 
-Robo ESP32 menggunakan driver dalam mod `PWM_PWM`. Maker ESP32 menggunakan
-ESP32-WROOM-32E; jangan gantikan dengan ESP32-S3/C3 untuk controller PS4 Bluetooth
-Classic. Keserasian controller clone perlu diuji secara fizikal.
+Robo ESP32 uses the motor driver in `PWM_PWM` mode. Maker ESP32 uses an
+ESP32-WROOM-32E; do not substitute an ESP32-S3/C3 for a PS4 controller using
+Bluetooth Classic. Compatibility with clone controllers requires physical testing.
 
-Untuk Robo ESP32, gunakan bateri LiPo/Li-ion **1 sel** melalui connector bateri
-yang sesuai, atau **3.6–6V pada terminal VIN Robo ESP32**. Voltan motor mengikut
-bekalan board. Jangan sambung bateri 2S terus. Had ini merujuk kepada Robo ESP32,
-bukan pin bekalan pada Maker ESP32. Padankan voltan dan arus stall motor dengan
-rating driver/bekalan. Pengguna menggunakan bateri 6V dan motor TT; model tepat
-dan arus stall motor belum disahkan.
+Power Robo ESP32 with a **single-cell LiPo/Li-ion battery** through the appropriate
+battery connector, or **3.6–6V at the Robo ESP32 VIN terminal**. The motor voltage
+follows the board supply. Do not connect a 2S battery directly. These limits apply
+to Robo ESP32, not the power pins on Maker ESP32. Match the motor voltage and
+stall current to the driver and supply ratings. This project uses a 6V battery
+and TT motors; the exact motor model and stall current have not been confirmed.
 
-## Kawalan
+## Controls
 
-Kedua-dua cara aktif tanpa butang tukar mode. **D-pad mendapat keutamaan** apabila
-ditekan. Apabila dilepaskan, robot kembali mengikut kedudukan analog semasa;
-jika analog masih ditolak, robot terus bergerak mengikut analog tersebut.
+Both control methods are active without a mode-switch button. **The D-pad takes
+priority** while pressed. Releasing it returns control to the current stick
+positions; if a stick is still deflected, the robot continues moving according
+to that input.
 
-### 1. D-pad kiri: lapan arah
+### 1. Left D-pad: eight directions
 
-`+` = maju, `-` = undur, `0` = output motor berhenti. Arah dalam jadual ialah arah
-robot selepas polariti setiap motor dibetulkan.
+`+` = forward, `-` = reverse, `0` = motor output stopped. The table describes robot
+motion after correcting the polarity of each motor.
 
-| D-pad | Gerakan | Motor kiri | Motor kanan |
+| D-pad | Movement | Left motor | Right motor |
 |---|---|---|---|
-| Atas | Maju | + | + |
-| Bawah | Undur | - | - |
-| Kiri | Pusing setempat kiri | - | + |
-| Kanan | Pusing setempat kanan | + | - |
-| Atas + kiri | Maju kiri | 0 | + |
-| Atas + kanan | Maju kanan | + | 0 |
-| Bawah + kiri | Undur kiri | 0 | - |
-| Bawah + kanan | Undur kanan | - | 0 |
+| Up | Forward | + | + |
+| Down | Reverse | - | - |
+| Left | Rotate left in place | - | + |
+| Right | Rotate right in place | + | - |
+| Up + left | Forward left | 0 | + |
+| Up + right | Forward right | + | 0 |
+| Down + left | Reverse left | 0 | - |
+| Down + right | Reverse right | - | 0 |
 
-Arah diagonal menggerakkan satu roda sahaja. Kombinasi bertentangan seperti
-atas + bawah dihentikan oleh kod.
+Diagonal directions drive only one wheel. Conflicting combinations such as
+up + down stop the motor outputs.
 
-### 2. Dua analog
+### 2. Dual analog sticks
 
-- **Analog kiri, paksi Y:** atas = maju, bawah = undur.
-- **Analog kanan, paksi X:** kiri/kanan = steering.
-- Analog kiri X dan analog kanan Y tidak digunakan.
-- Steering sahaja menghasilkan pusing setempat.
-- Kedua-dua input digabungkan: `left = throttle + steering`,
-  `right = throttle - steering`, kemudian dinormalkan kepada had PWM.
-- Steering kanan sentiasa menghasilkan putaran badan ke kanan, termasuk
-  semasa undur; ini ialah kawalan putaran differential-drive. D-pad diagonal
-  pula memilih arah perjalanan seperti dalam jadual.
+- **Left stick, Y axis:** up = forward, down = reverse.
+- **Right stick, X axis:** left/right = steering.
+- Left stick X and right stick Y are unused.
+- Steering alone rotates the robot in place.
+- Both inputs are mixed using `left = throttle + steering` and
+  `right = throttle - steering`, then normalized to the PWM limit.
+- Right steering always rotates the robot's body to the right, including while
+  reversing; this is differential-drive rotation control. D-pad diagonals select
+  the direction of travel shown in the table instead.
 
-### Stop dan mula bergerak
+### Stopping and enabling movement
 
-- **Stop biasa:** lepaskan D-pad dan kembalikan analog ke neutral. Output motor
-  terus menjadi sifar pada laporan input berikutnya; tidak perlu tekan Cross
-  atau tunggu 300 ms untuk berhenti. Robot kekal ready.
-- **Cross (×)** ialah stop tambahan yang mengatasi input lain, walaupun joystick
-  masih ditolak. Ia menghentikan output motor dan membatalkan keadaan ready.
-- Untuk kembali ready: lepaskan Cross, lepaskan D-pad dan neutralkan kedua-dua
-  paksi analog yang digunakan selama **300 ms** dengan data controller diterima.
-- Syarat neutral yang sama digunakan selepas startup, reconnect atau timeout.
-- Tiada data baru daripada controller aktif selama **300 ms**: motor dihentikan.
-- Controller disconnect: motor dihentikan apabila disconnect dikesan.
-- Hanya satu gamepad diterima; controller tambahan ditolak. Touchpad virtual
-  mouse dimatikan.
-- Tidak perlu tahan R1 untuk memandu.
+- **Normal stop:** release the D-pad and center the sticks. Motor outputs become
+  zero on the next input report; there is no need to press Cross or wait 300 ms
+  to stop. The robot stays ready.
+- **Cross (×)** is an additional stop that overrides other inputs, even when a
+  stick is still deflected. It stops the motor outputs and clears the ready state.
+- To become ready again, release Cross and the D-pad, then center both active
+  stick axes for **300 ms** while controller data is being received.
+- The same neutral requirement applies after startup, reconnection, or timeout.
+- No new data from the active controller for **300 ms**: stop the motors.
+- Controller disconnection: stop the motors when the disconnection is detected.
+- Only one gamepad is accepted; additional controllers are rejected. The touchpad
+  virtual mouse is disabled.
+- There is no need to hold R1 to drive.
 
-Stop bermaksud output PWM menjadi sifar. Roda mungkin masih bergerak kerana
-inersia; ini bukan emergency stop fizikal. Software timeout memerlukan loop/CPU
-masih berjalan. Gunakan suis kuasa untuk memutuskan kuasa jika perlu.
+Stopping means setting PWM outputs to zero. The wheels may continue moving due
+to inertia; this is not a physical emergency stop. The software timeout requires
+the loop/CPU to remain running. Use the power switch to disconnect power if needed.
 
-## Setup Arduino IDE
+## Arduino IDE setup
 
-1. Tambah dua URL berikut dalam **Preferences → Additional Boards Manager URLs**:
+1. Add these two URLs in **Preferences → Additional Boards Manager URLs**:
 
    ```text
    https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
    https://raw.githubusercontent.com/ricardoquesada/esp32-arduino-lib-builder/master/bluepad32_files/package_esp32_bluepad32_index.json
    ```
 
-2. Dalam Boards Manager, pasang package ESP32 rasmi mengikut panduan Bluepad32,
-   serta package **ESP32 + Bluepad32 versi 4.1.0**. Versi package Bluepad32 inilah
-   yang digunakan untuk build yang disahkan dalam projek ini.
-3. Pilih **ESP32 Dev Module daripada menu ESP32 + Bluepad32**. Memilih board
-   ESP32 biasa tidak menyediakan integrasi Bluetooth Bluepad32 yang diperlukan.
-4. Dalam Library Manager, pasang **Cytron Motor Drivers Library versi 1.0.1**.
-   Bluepad32 datang bersama board package; tidak perlu library PS4Controller.
-5. Tetapkan **Flash Size: 8MB**, **Partition Scheme: Huge APP (3MB No OTA/1MB SPIFFS)**.
-   Pilih port USB Maker ESP32. Kekalkan tetapan lain pada default board package.
-6. Buka `Arduino/MakerESP32_MobileRobot_PS4/MakerESP32_MobileRobot_PS4.ino`,
-   kemudian Verify dan Upload. **Angkat roda daripada lantai semasa ujian awal.**
-7. Buka Serial Monitor pada **115200 baud**.
-8. Pada controller, tahan **SHARE + PS** sehingga light bar berkelip untuk pairing.
-   Selepas mesej connected, neutralkan kawalan sehingga mesej `Ready` muncul.
+2. In Boards Manager, install the official ESP32 package following the Bluepad32
+   guide, and **ESP32 + Bluepad32 version 4.1.0**. This is the Bluepad32 package
+   version used for the verified build in this project.
+3. Select **ESP32 Dev Module from the ESP32 + Bluepad32 menu**. Selecting a regular
+   ESP32 board does not provide the required Bluepad32 Bluetooth integration.
+4. In Library Manager, install **Cytron Motor Drivers Library version 1.0.1**.
+   Bluepad32 comes with the board package; PS4Controller is not required.
+5. Set **Flash Size: 8MB** and **Partition Scheme: Huge APP (3MB No OTA/1MB SPIFFS)**.
+   Select the Maker ESP32 USB port. Leave other settings at the board package defaults.
+6. Open `Arduino/MakerESP32_MobileRobot_PS4/MakerESP32_MobileRobot_PS4.ino`,
+   then Verify and Upload. **Keep the wheels off the ground during initial testing.**
+7. Open Serial Monitor at **115200 baud**.
+8. Hold **SHARE + PS** on the controller until the light bar flashes to pair.
+   After the connected message, center the controls until the `Ready` message appears.
 
-Kod mengekalkan Bluetooth pairing keys semasa reset. Ia tidak memanggil
-`forgetBluetoothKeys()` setiap boot. Jika controller cuba menyambung ke konsol
-atau komputer lama, matikan sambungan tersebut dan cuba pairing SHARE + PS lagi.
+The code preserves Bluetooth pairing keys across resets. It does not call
+`forgetBluetoothKeys()` on every boot. If the controller tries to connect to a
+previous console or computer, disconnect it there and try SHARE + PS pairing again.
 
-## Tetapan dalam sketch
+## Sketch settings
 
-| Constant | Default | Kegunaan |
+| Constant | Default | Purpose |
 |---|---|---|
-| `MAX_PWM` | 255 | Had PWM analog, 100% duty |
-| `DPAD_PWM` | 255 | PWM tetap D-pad; mesti tidak melebihi `MAX_PWM` |
-| `AXIS_DEADBAND` | 40 | Toleransi sekitar tengah joystick, julat paksi ±512 |
-| `INPUT_TIMEOUT_MS` | 300 | Had masa tanpa data baru |
-| `NEUTRAL_HOLD_MS` | 300 | Tempoh neutral sebelum ready |
-| `INVERT_RIGHT` | false | Songsangkan arah motor kanan |
-| `INVERT_LEFT` | false | Songsangkan arah motor kiri |
+| `MAX_PWM` | 255 | Analog PWM limit, 100% duty |
+| `DPAD_PWM` | 255 | Fixed D-pad PWM; must not exceed `MAX_PWM` |
+| `AXIS_DEADBAND` | 40 | Tolerance around stick center, axis range ±512 |
+| `INPUT_TIMEOUT_MS` | 300 | Maximum time without new data |
+| `NEUTRAL_HOLD_MS` | 300 | Neutral period before becoming ready |
+| `INVERT_RIGHT` | false | Reverse the right motor direction |
+| `INVERT_LEFT` | false | Reverse the left motor direction |
 
-D-pad menggunakan PWM penuh; analog masih mengawal PWM secara proportional
-dari sifar hingga maksimum. Peratus PWM bukan jaminan peratus kelajuan fizikal.
-Jika motor tidak mula berpusing pada PWM rendah, periksa bekalan, beban dan
-mekanikal sebelum menambah input analog. Kod
-menggunakan deadband yang diskalakan semula, tanpa minimum-PWM jump atau ramp.
+The D-pad uses full PWM; analog input still controls PWM proportionally from zero
+to the maximum. PWM percentage does not guarantee a matching percentage of physical
+speed. If a motor does not start at low PWM, check the supply, load, and mechanics
+before increasing the analog input. The code rescales the input after the deadband,
+without a minimum-PWM jump or ramp.
 
-## Ujian pada robot
+## Testing on the robot
 
-1. Angkat roda. Pastikan tiada gerakan ketika startup, belum paired, atau pairing
-   dibuat dengan joystick ditolak.
-2. Selepas ready, tekan atas sebentar. Kedua-dua roda mesti memacu robot ke depan.
-   Jika salah satu terbalik, ubah `INVERT_RIGHT` atau `INVERT_LEFT`, kemudian upload.
-3. Semak semua lapan arah D-pad mengikut jadual dan kedua-dua analog berasingan.
-4. Semak D-pad override analog dan peralihan kembali kepada analog semasa dilepas.
-5. Uji Cross ketika bergerak: output berhenti, dan gerakan tidak bersambung semula
-   sehingga kawalan neutral.
-6. Matikan controller semasa memandu dengan roda terangkat. Semak motor berhenti
-   dan reconnect dengan input ditahan tidak terus menggerakkan motor.
-7. Uji perlahan di lantai; semak drift, arus/bekalan, motor panas, reset/brownout,
-   respons Bluetooth dan jarak berhenti. D-pad menggunakan 100% PWM; gunakan
-   analog dengan input kecil untuk ujian perlahan.
+1. Lift the wheels. Confirm there is no motion during startup, before pairing,
+   or when pairing with a stick deflected.
+2. Once ready, briefly press up. Both wheels should drive the robot forward.
+   If one is reversed, change `INVERT_RIGHT` or `INVERT_LEFT`, then upload again.
+3. Check all eight D-pad directions against the table and test both sticks separately.
+4. Check that the D-pad overrides analog input and returns to analog control when released.
+5. Test Cross while moving: the outputs stop, and movement does not resume until
+   the controls return to neutral.
+6. Turn off the controller while driving with the wheels raised. Check that the
+   motors stop and reconnecting with a held input does not immediately move them.
+7. Test slowly on the floor; check drift, current/supply, motor heating, resets or
+   brownouts, Bluetooth response, and stopping distance. The D-pad uses 100% PWM;
+   use small analog inputs for slow testing.
 
 ## Validation
 
-Disahkan pada 9 September 2026:
+Verified on 9 September 2026:
 
-- **Compile ESP32 lulus:** `esp32-bluepad32:esp32@4.1.0` dan
+- **ESP32 compile passed:** `esp32-bluepad32:esp32@4.1.0` and
   `Cytron Motor Drivers Library@1.0.1`.
 - FQBN: `esp32-bluepad32:esp32:esp32:FlashSize=8M,PartitionScheme=huge_app`.
 - Sketch: **719417 bytes**, global RAM: **87228 bytes**.
-- **Host logic tests lulus:** lapan arah D-pad dan kombinasi tidak sah, deadband,
-  had output analog, mixing, D-pad priority, release-to-stop tanpa Cross,
-  neutral arming, Cross stop,
-  timeout termasuk laporan baru selepas sela panjang, controller ownership dan
-  `millis()` rollover.
-- **Belum diuji pada hardware:** upload ke board, pairing PS4, arah motor,
-  prestasi bekalan dan masa berhenti sebenar.
+- **Host logic tests passed:** eight D-pad directions and invalid combinations,
+  deadband, analog output limits, mixing, D-pad priority, release-to-stop without
+  Cross, neutral arming, Cross stop, timeout including a new report after a long
+  gap, controller ownership, and `millis()` rollover.
+- **Not yet tested on hardware:** board upload, PS4 pairing, motor direction,
+  supply performance, and actual stopping time.
 
-Compile menggunakan Arduino CLI setelah dependency dipasang:
+Compile with Arduino CLI after installing the dependencies:
 
 ```sh
 arduino-cli compile \
@@ -178,7 +180,7 @@ arduino-cli compile \
   Arduino/MakerESP32_MobileRobot_PS4
 ```
 
-Jalankan host tests dari root repository dengan compiler C++17:
+Run the host tests from the repository root with a C++17 compiler:
 
 ```sh
 c++ -std=c++17 -Wall -Wextra -Werror -I tests/stubs \
@@ -186,16 +188,16 @@ c++ -std=c++17 -Wall -Wextra -Werror -I tests/stubs \
 /tmp/maker-esp32-test
 ```
 
-Tests memasukkan sketch sebenar menggunakan stub Arduino/Bluepad32/motor.
-Ia menguji logik arahan sahaja, bukan Bluetooth stack, output elektrik atau
-pergerakan fizikal. Stub tidak digunakan oleh Arduino IDE.
+The tests include the actual sketch with Arduino/Bluepad32/motor stubs. They test
+command logic only, not the Bluetooth stack, electrical outputs, or physical motion.
+Arduino IDE does not use these stubs.
 
-## Rujukan rasmi
+## Official references
 
 - [Maker ESP32](https://my.cytron.io/p-maker-esp32-bundle)
-- [Robo ESP32 dan datasheet](https://my.cytron.io/p-robo-esp32)
-- [Contoh pin motor Cytron](https://github.com/CytronTechnologies/Cytron-ROBO-ESP32/blob/main/Getting%20Started%20Guide/Arduino/DCMotor/DCMotor.ino)
+- [Robo ESP32 and datasheet](https://my.cytron.io/p-robo-esp32)
+- [Cytron motor pin example](https://github.com/CytronTechnologies/Cytron-ROBO-ESP32/blob/main/Getting%20Started%20Guide/Arduino/DCMotor/DCMotor.ino)
 - [Cytron Motor Driver Library](https://github.com/CytronTechnologies/CytronMotorDriver)
-- [Panduan Arduino Bluepad32](https://bluepad32.readthedocs.io/en/latest/plat_arduino/)
-- [Controller yang disokong dan pairing](https://bluepad32.readthedocs.io/en/latest/supported_gamepads/)
-- [Tutorial ESP32 + PS4 Cytron](https://my.cytron.io/tutorial/esp32-ps4controller-beginner)
+- [Bluepad32 Arduino guide](https://bluepad32.readthedocs.io/en/latest/plat_arduino/)
+- [Supported controllers and pairing](https://bluepad32.readthedocs.io/en/latest/supported_gamepads/)
+- [Cytron ESP32 + PS4 tutorial](https://my.cytron.io/tutorial/esp32-ps4controller-beginner)
