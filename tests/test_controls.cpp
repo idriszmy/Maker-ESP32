@@ -20,9 +20,9 @@ int main() {
 
   // Every valid D-pad direction, plus every conflicting bit combination.
   const int expected[16][2] = {
-    {0, 0}, {102, 102}, {-102, -102}, {0, 0},
-    {102, -102}, {102, 0}, {-102, 0}, {0, 0},
-    {-102, 102}, {0, 102}, {0, -102}, {0, 0},
+    {0, 0}, {255, 255}, {-255, -255}, {0, 0},
+    {255, -255}, {255, 0}, {-255, 0}, {0, 0},
+    {-255, 255}, {0, 255}, {0, -255}, {0, 0},
     {0, 0}, {0, 0}, {0, 0}, {0, 0}
   };
   for (int bits = 0; bits < 16; ++bits) {
@@ -43,17 +43,17 @@ int main() {
   Controller ctl;
   ctl.leftY = -512;
   driveAnalog(&ctl);
-  expectMotors(102, 102);
+  expectMotors(255, 255);
   ctl.leftY = 512;
   driveAnalog(&ctl);
-  expectMotors(-102, -102);
+  expectMotors(-255, -255);
   ctl.leftY = 0;
   ctl.rightX = 512;
   driveAnalog(&ctl);
-  expectMotors(102, -102);
+  expectMotors(255, -255);
   ctl.rightX = -512;
   driveAnalog(&ctl);
-  expectMotors(-102, 102);
+  expectMotors(-255, 255);
   ctl.leftY = -512;
   ctl.rightX = 256;
   driveAnalog(&ctl);
@@ -83,19 +83,35 @@ int main() {
   ctl.leftY = -512;
   ctl.directions = DPAD_LEFT;
   report(ctl, 520);
-  expectMotors(-102, 102);  // D-pad overrides the held forward stick.
+  expectMotors(-255, 255);  // D-pad overrides the held forward stick.
   ctl.directions = 0;
   report(ctl, 530);
-  expectMotors(102, 102);   // Releasing D-pad returns to live analog inputs.
+  expectMotors(255, 255);   // Releasing D-pad returns to live analog inputs.
+
+  // Releasing either drive method stops without needing Cross.
+  ctl.leftY = 0;
+  report(ctl, 531);
+  expectMotors(0, 0);
+  assert(armed);
+  ctl.directions = DPAD_UP;
+  report(ctl, 532);
+  expectMotors(255, 255);
+  ctl.directions = 0;
+  report(ctl, 533);
+  expectMotors(0, 0);
+  assert(armed);
+  ctl.leftY = -512;
+  report(ctl, 534);
+  expectMotors(255, 255);
 
   // Updates from another device must not renew this controller's timeout.
   ctl.fresh = false;
   BP32.changed = true;
-  testClock = 829;
+  testClock = 833;
   loop();
-  expectMotors(102, 102);
+  expectMotors(255, 255);
   BP32.changed = true;
-  testClock = 830;
+  testClock = 834;
   loop();
   expectMotors(0, 0);
   assert(!armed);
@@ -109,7 +125,7 @@ int main() {
   assert(armed);
   ctl.leftY = -512;
   report(ctl, 1160);
-  expectMotors(102, 102);
+  expectMotors(255, 255);
   report(ctl, 1600);       // Fresh data after a long loop gap still disarms.
   expectMotors(0, 0);
   assert(!armed);
@@ -147,7 +163,7 @@ int main() {
   assert(armed);
   ctl.leftY = -512;
   report(ctl, 110);
-  expectMotors(102, 102);
+  expectMotors(255, 255);
   ctl.fresh = false;
   testClock = 410;
   loop();
