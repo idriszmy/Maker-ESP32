@@ -42,6 +42,9 @@ Kedua-dua cara aktif tanpa butang tukar mode. **D-pad mendapat keutamaan** apabi
 ditekan. Apabila dilepaskan, robot kembali mengikut kedudukan analog semasa;
 jika analog masih ditolak, robot terus bergerak mengikut analog tersebut.
 
+D-pad menggunakan kira-kira **50% PWM** secara default. Tahan **R2 bersama D-pad**
+untuk menggunakan **100% PWM**. R2 tidak mengubah kawalan analog.
+
 ### 1. D-pad kiri: lapan arah
 
 `+` = maju, `-` = undur, `0` = output motor berhenti. Arah dalam jadual ialah arah
@@ -126,15 +129,16 @@ atau komputer lama, matikan sambungan tersebut dan cuba pairing SHARE + PS lagi.
 | Constant | Default | Kegunaan |
 |---|---|---|
 | `MAX_PWM` | 255 | Had PWM analog, 100% duty |
-| `DPAD_PWM` | 255 | PWM tetap D-pad; mesti tidak melebihi `MAX_PWM` |
+| `DPAD_PWM` | 128 | PWM biasa D-pad, kira-kira 50%; R2 guna `MAX_PWM` |
 | `AXIS_DEADBAND` | 40 | Toleransi sekitar tengah joystick, julat paksi ±512 |
 | `INPUT_TIMEOUT_MS` | 300 | Had masa tanpa data baru |
 | `NEUTRAL_HOLD_MS` | 300 | Tempoh neutral sebelum ready |
 | `INVERT_RIGHT` | false | Songsangkan arah motor kanan |
 | `INVERT_LEFT` | false | Songsangkan arah motor kiri |
 
-D-pad menggunakan PWM penuh; analog masih mengawal PWM secara proportional
-dari sifar hingga maksimum. Peratus PWM bukan jaminan peratus kelajuan fizikal.
+D-pad menggunakan kira-kira 50% PWM secara biasa dan PWM penuh semasa R2 ditahan.
+Analog masih mengawal PWM secara proportional dari sifar hingga maksimum. Peratus
+PWM bukan jaminan peratus kelajuan fizikal.
 Jika motor tidak mula berpusing pada PWM rendah, periksa bekalan, beban dan
 mekanikal sebelum menambah input analog. Kod
 menggunakan deadband yang diskalakan semula, tanpa minimum-PWM jump atau ramp.
@@ -152,8 +156,8 @@ menggunakan deadband yang diskalakan semula, tanpa minimum-PWM jump atau ramp.
 6. Matikan controller semasa memandu dengan roda terangkat. Semak motor berhenti
    dan reconnect dengan input ditahan tidak terus menggerakkan motor.
 7. Uji perlahan di lantai; semak drift, arus/bekalan, motor panas, reset/brownout,
-   respons Bluetooth dan jarak berhenti. D-pad menggunakan 100% PWM; gunakan
-   analog dengan input kecil untuk ujian perlahan.
+   respons Bluetooth dan jarak berhenti. Uji kelajuan biasa D-pad dahulu, kemudian
+   tahan R2 untuk menguji 100% PWM.
 
 ## Validation
 

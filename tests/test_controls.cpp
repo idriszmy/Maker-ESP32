@@ -20,16 +20,16 @@ int main() {
 
   // Every valid D-pad direction, plus every conflicting bit combination.
   const int expected[16][2] = {
-    {0, 0}, {255, 255}, {-255, -255}, {0, 0},
-    {255, -255}, {255, 0}, {-255, 0}, {0, 0},
-    {-255, 255}, {0, 255}, {0, -255}, {0, 0},
+    {0, 0}, {128, 128}, {-128, -128}, {0, 0},
+    {128, -128}, {128, 0}, {-128, 0}, {0, 0},
+    {-128, 128}, {0, 128}, {0, -128}, {0, 0},
     {0, 0}, {0, 0}, {0, 0}, {0, 0}
   };
   for (int bits = 0; bits < 16; ++bits) {
-    driveDpad(bits);
+    driveDpad(bits, DPAD_PWM);
     expectMotors(expected[bits][0], expected[bits][1]);
   }
-  driveDpad(255);
+  driveDpad(255, DPAD_PWM);
   expectMotors(0, 0);
 
   // Deadband, odd symmetry, monotonic output and clipping at axis limits.
@@ -83,7 +83,11 @@ int main() {
   ctl.leftY = -512;
   ctl.directions = DPAD_LEFT;
   report(ctl, 520);
-  expectMotors(-255, 255);  // D-pad overrides the held forward stick.
+  expectMotors(-128, 128);  // D-pad overrides the held forward stick at 50%.
+  ctl.boost = true;
+  report(ctl, 521);
+  expectMotors(-255, 255);  // Holding R2 boosts D-pad movement to 100%.
+  ctl.boost = false;
   ctl.directions = 0;
   report(ctl, 530);
   expectMotors(255, 255);   // Releasing D-pad returns to live analog inputs.
@@ -95,7 +99,7 @@ int main() {
   assert(armed);
   ctl.directions = DPAD_UP;
   report(ctl, 532);
-  expectMotors(255, 255);
+  expectMotors(128, 128);
   ctl.directions = 0;
   report(ctl, 533);
   expectMotors(0, 0);

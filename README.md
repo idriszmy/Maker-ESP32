@@ -43,6 +43,9 @@ priority** while pressed. Releasing it returns control to the current stick
 positions; if a stick is still deflected, the robot continues moving according
 to that input.
 
+The D-pad runs at about **50% PWM** by default. Hold **R2 together with the D-pad**
+for **100% PWM**. R2 does not change analog-stick control.
+
 ### 1. Left D-pad: eight directions
 
 `+` = forward, `-` = reverse, `0` = motor output stopped. The table describes robot
@@ -127,15 +130,16 @@ previous console or computer, disconnect it there and try SHARE + PS pairing aga
 | Constant | Default | Purpose |
 |---|---|---|
 | `MAX_PWM` | 255 | Analog PWM limit, 100% duty |
-| `DPAD_PWM` | 255 | Fixed D-pad PWM; must not exceed `MAX_PWM` |
+| `DPAD_PWM` | 128 | Normal D-pad PWM, about 50%; R2 uses `MAX_PWM` |
 | `AXIS_DEADBAND` | 40 | Tolerance around stick center, axis range ±512 |
 | `INPUT_TIMEOUT_MS` | 300 | Maximum time without new data |
 | `NEUTRAL_HOLD_MS` | 300 | Neutral period before becoming ready |
 | `INVERT_RIGHT` | false | Reverse the right motor direction |
 | `INVERT_LEFT` | false | Reverse the left motor direction |
 
-The D-pad uses full PWM; analog input still controls PWM proportionally from zero
-to the maximum. PWM percentage does not guarantee a matching percentage of physical
+The D-pad uses about 50% PWM normally and full PWM while R2 is held. Analog input
+still controls PWM proportionally from zero to the maximum. PWM percentage does
+not guarantee a matching percentage of physical
 speed. If a motor does not start at low PWM, check the supply, load, and mechanics
 before increasing the analog input. The code rescales the input after the deadband,
 without a minimum-PWM jump or ramp.
@@ -153,8 +157,8 @@ without a minimum-PWM jump or ramp.
 6. Turn off the controller while driving with the wheels raised. Check that the
    motors stop and reconnecting with a held input does not immediately move them.
 7. Test slowly on the floor; check drift, current/supply, motor heating, resets or
-   brownouts, Bluetooth response, and stopping distance. The D-pad uses 100% PWM;
-   use small analog inputs for slow testing.
+   brownouts, Bluetooth response, and stopping distance. Test normal D-pad speed
+   first, then hold R2 to test 100% PWM.
 
 ## Validation
 

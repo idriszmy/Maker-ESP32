@@ -7,7 +7,7 @@ constexpr uint8_t RIGHT_B = 13;
 constexpr uint8_t LEFT_A = 14;
 constexpr uint8_t LEFT_B = 27;
 constexpr int MAX_PWM = 255;        // Full PWM range; analog input remains proportional.
-constexpr int DPAD_PWM = 255;
+constexpr int DPAD_PWM = 128;       // About 50%; hold R2 for MAX_PWM.
 constexpr int AXIS_LIMIT = 512;
 constexpr int AXIS_DEADBAND = 40;
 constexpr uint32_t INPUT_TIMEOUT_MS = 300;
@@ -63,17 +63,17 @@ bool controlsNeutral(ControllerPtr ctl) {
          abs(ctl->axisRX()) <= AXIS_DEADBAND;
 }
 
-void driveDpad(uint8_t dpad) {
+void driveDpad(uint8_t dpad, int speed) {
   // Diagonals describe the direction of travel, including when reversing.
   switch (dpad) {
-    case DPAD_UP:                   drive(DPAD_PWM, DPAD_PWM); break;
-    case DPAD_DOWN:                 drive(-DPAD_PWM, -DPAD_PWM); break;
-    case DPAD_LEFT:                 drive(-DPAD_PWM, DPAD_PWM); break;
-    case DPAD_RIGHT:                drive(DPAD_PWM, -DPAD_PWM); break;
-    case DPAD_UP | DPAD_LEFT:       drive(0, DPAD_PWM); break;
-    case DPAD_UP | DPAD_RIGHT:      drive(DPAD_PWM, 0); break;
-    case DPAD_DOWN | DPAD_LEFT:     drive(0, -DPAD_PWM); break;
-    case DPAD_DOWN | DPAD_RIGHT:    drive(-DPAD_PWM, 0); break;
+    case DPAD_UP:                   drive(speed, speed); break;
+    case DPAD_DOWN:                 drive(-speed, -speed); break;
+    case DPAD_LEFT:                 drive(-speed, speed); break;
+    case DPAD_RIGHT:                drive(speed, -speed); break;
+    case DPAD_UP | DPAD_LEFT:       drive(0, speed); break;
+    case DPAD_UP | DPAD_RIGHT:      drive(speed, 0); break;
+    case DPAD_DOWN | DPAD_LEFT:     drive(0, -speed); break;
+    case DPAD_DOWN | DPAD_RIGHT:    drive(-speed, 0); break;
     default: stopMotors(); break;  // Reject conflicting or unknown directions.
   }
 }
@@ -119,7 +119,9 @@ void processInput(ControllerPtr ctl, uint32_t now) {
   }
 
   // D-pad takes priority; release it to return to the current stick inputs.
-  if (ctl->dpad() != 0) driveDpad(ctl->dpad());
+  if (ctl->dpad() != 0) {
+    driveDpad(ctl->dpad(), ctl->r2() ? MAX_PWM : DPAD_PWM);
+  }
   else driveAnalog(ctl);
 }
 
