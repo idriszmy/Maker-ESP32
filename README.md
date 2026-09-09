@@ -73,6 +73,8 @@ up + down stop the motor outputs.
 - Steering alone rotates the robot in place.
 - Both inputs are mixed using `left = throttle + steering` and
   `right = throttle - steering`, then normalized to the PWM limit.
+- Throttle and steering use a squared response curve after the deadband. Small
+  stick movements produce gentle output, while full travel still reaches 100%.
 - Right steering always rotates the robot's body to the right, including while
   reversing; this is differential-drive rotation control. D-pad diagonals select
   the direction of travel shown in the table instead.
@@ -138,8 +140,9 @@ previous console or computer, disconnect it there and try SHARE + PS pairing aga
 | `INVERT_LEFT` | false | Reverse the left motor direction |
 
 The D-pad uses about 50% PWM normally and full PWM while R2 is held. Analog input
-still controls PWM proportionally from zero to the maximum. PWM percentage does
-not guarantee a matching percentage of physical
+uses a squared curve: halfway through the usable stick travel produces about 25%
+PWM, while full travel produces 100%. PWM percentage does not guarantee a matching
+percentage of physical
 speed. If a motor does not start at low PWM, check the supply, load, and mechanics
 before increasing the analog input. The code rescales the input after the deadband,
 without a minimum-PWM jump or ramp.
@@ -167,9 +170,10 @@ Verified on 9 September 2026:
 - **ESP32 compile passed:** `esp32-bluepad32:esp32@4.1.0` and
   `Cytron Motor Drivers Library@1.0.1`.
 - FQBN: `esp32-bluepad32:esp32:esp32:FlashSize=8M,PartitionScheme=huge_app`.
-- Sketch: **719417 bytes**, global RAM: **87228 bytes**.
+- Sketch: **719281 bytes**, global RAM: **87228 bytes**.
 - **Host logic tests passed:** eight D-pad directions and invalid combinations,
-  deadband, analog output limits, mixing, D-pad priority, release-to-stop without
+  deadband, squared analog response, output limits, mixing, D-pad priority,
+  release-to-stop without
   Cross, neutral arming, Cross stop, timeout including a new report after a long
   gap, controller ownership, and `millis()` rollover.
 - Connection handling follows the official Bluepad32 example by retaining the

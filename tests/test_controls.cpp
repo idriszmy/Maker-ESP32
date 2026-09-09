@@ -39,6 +39,9 @@ int main() {
     if (abs(axis) <= AXIS_DEADBAND) assert(axisToPwm(axis) == 0);
     if (axis < 600) assert(axisToPwm(axis + 1) >= axisToPwm(axis));
   }
+  // Squared response: halfway through usable travel is about 25% PWM.
+  assert(axisToPwm(AXIS_DEADBAND + (AXIS_LIMIT - AXIS_DEADBAND) / 2) == 63);
+  assert(axisToPwm(AXIS_LIMIT) == MAX_PWM);
 
   Controller ctl;
   ctl.leftY = -512;
@@ -196,6 +199,6 @@ int main() {
   expectMotors(0, 0);
   assert(!armed);
 
-  std::cout << "PASS: D-pad, analog mixing, deadband, priority, neutral arming, "
+  std::cout << "PASS: D-pad, squared analog response, mixing, deadband, priority, neutral arming, "
                "stop, timeout, controller ownership and clock rollover\n";
 }

@@ -6,7 +6,7 @@ constexpr uint8_t RIGHT_A = 12;
 constexpr uint8_t RIGHT_B = 13;
 constexpr uint8_t LEFT_A = 14;
 constexpr uint8_t LEFT_B = 27;
-constexpr int MAX_PWM = 255;        // Full PWM range; analog input remains proportional.
+constexpr int MAX_PWM = 255;        // Full PWM range.
 constexpr int DPAD_PWM = 128;       // About 50%; hold R2 for MAX_PWM.
 constexpr int AXIS_LIMIT = 512;
 constexpr int AXIS_DEADBAND = 40;
@@ -51,9 +51,12 @@ int axisToPwm(int axis) {
   const int magnitude = abs(axis);
   if (magnitude <= AXIS_DEADBAND) return 0;
 
-  // Rescale after the deadband so speed starts smoothly from zero.
-  const int pwm = (magnitude - AXIS_DEADBAND) * MAX_PWM /
-                  (AXIS_LIMIT - AXIS_DEADBAND);
+  // Square the normalized input after the deadband. This gives finer control
+  // near the centre while still reaching MAX_PWM at full stick travel.
+  const int32_t adjusted = magnitude - AXIS_DEADBAND;
+  const int32_t usableRange = AXIS_LIMIT - AXIS_DEADBAND;
+  const int pwm = int((int64_t(adjusted) * adjusted * MAX_PWM) /
+                      (int64_t(usableRange) * usableRange));
   return axis < 0 ? -pwm : pwm;
 }
 

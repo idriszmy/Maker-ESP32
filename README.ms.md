@@ -72,6 +72,8 @@ atas + bawah dihentikan oleh kod.
 - Steering sahaja menghasilkan pusing setempat.
 - Kedua-dua input digabungkan: `left = throttle + steering`,
   `right = throttle - steering`, kemudian dinormalkan kepada had PWM.
+- Throttle dan steering menggunakan lengkung kuasa dua selepas deadband. Gerakan
+  kecil joystick menghasilkan output lembut, manakala gerakan penuh masih 100%.
 - Steering kanan sentiasa menghasilkan putaran badan ke kanan, termasuk
   semasa undur; ini ialah kawalan putaran differential-drive. D-pad diagonal
   pula memilih arah perjalanan seperti dalam jadual.
@@ -137,8 +139,9 @@ atau komputer lama, matikan sambungan tersebut dan cuba pairing SHARE + PS lagi.
 | `INVERT_LEFT` | false | Songsangkan arah motor kiri |
 
 D-pad menggunakan kira-kira 50% PWM secara biasa dan PWM penuh semasa R2 ditahan.
-Analog masih mengawal PWM secara proportional dari sifar hingga maksimum. Peratus
-PWM bukan jaminan peratus kelajuan fizikal.
+Analog menggunakan lengkung kuasa dua: separuh daripada julat joystick yang boleh
+digunakan menghasilkan kira-kira 25% PWM, manakala gerakan penuh menghasilkan
+100%. Peratus PWM bukan jaminan peratus kelajuan fizikal.
 Jika motor tidak mula berpusing pada PWM rendah, periksa bekalan, beban dan
 mekanikal sebelum menambah input analog. Kod
 menggunakan deadband yang diskalakan semula, tanpa minimum-PWM jump atau ramp.
@@ -166,9 +169,9 @@ Disahkan pada 9 September 2026:
 - **Compile ESP32 lulus:** `esp32-bluepad32:esp32@4.1.0` dan
   `Cytron Motor Drivers Library@1.0.1`.
 - FQBN: `esp32-bluepad32:esp32:esp32:FlashSize=8M,PartitionScheme=huge_app`.
-- Sketch: **719417 bytes**, global RAM: **87228 bytes**.
+- Sketch: **719281 bytes**, global RAM: **87228 bytes**.
 - **Host logic tests lulus:** lapan arah D-pad dan kombinasi tidak sah, deadband,
-  had output analog, mixing, D-pad priority, release-to-stop tanpa Cross,
+  lengkung kuasa dua analog, had output, mixing, D-pad priority, release-to-stop tanpa Cross,
   neutral arming, Cross stop,
   timeout termasuk laporan baru selepas sela panjang, controller ownership dan
   `millis()` rollover.
