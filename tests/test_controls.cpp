@@ -149,6 +149,15 @@ int main() {
   assert(!extra.connected && gamepad == &ctl);
   onDisconnectedController(&extra);
   assert(gamepad == &ctl);
+
+  // Ignore a DS4 virtual touchpad without disconnecting it or its parent.
+  Controller touchpad;
+  touchpad.physicalGamepad = false;
+  onConnectedController(&touchpad);
+  assert(touchpad.connected && gamepad == &ctl);
+  onDisconnectedController(&touchpad);
+  assert(gamepad == &ctl);
+
   onDisconnectedController(&ctl);
   expectMotors(0, 0);
   assert(!armed && gamepad == nullptr);

@@ -124,8 +124,12 @@ void processInput(ControllerPtr ctl, uint32_t now) {
 }
 
 void onConnectedController(ControllerPtr ctl) {
-  // One physical gamepad owns the robot; reject additional controllers.
-  if (gamepad != nullptr || !ctl->isGamepad()) {
+  // A DS4 touchpad can appear as a virtual mouse. Ignore it without calling
+  // disconnect(), because disconnecting the child can also drop the gamepad.
+  if (!ctl->isGamepad()) return;
+
+  // One physical gamepad owns the robot; reject additional gamepads.
+  if (gamepad != nullptr) {
     ctl->disconnect();
     return;
   }
@@ -145,8 +149,8 @@ void onDisconnectedController(ControllerPtr ctl) {
 void setup() {
   stopMotors();
   Serial.begin(115200);
-  BP32.setup(&onConnectedController, &onDisconnectedController);
   BP32.enableVirtualDevice(false);  // PS4 touchpad must not become a second device.
+  BP32.setup(&onConnectedController, &onDisconnectedController);
   // Keep Bluetooth keys across resets; do not forget keys on every boot.
   Serial.println("Pair PS4: hold SHARE + PS until the light bar flashes.");
 }

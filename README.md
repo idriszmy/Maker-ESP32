@@ -86,8 +86,8 @@ up + down stop the motor outputs.
 - The same neutral requirement applies after startup, reconnection, or timeout.
 - No new data from the active controller for **300 ms**: stop the motors.
 - Controller disconnection: stop the motors when the disconnection is detected.
-- Only one gamepad is accepted; additional controllers are rejected. The touchpad
-  virtual mouse is disabled.
+- Only one gamepad is accepted; additional gamepads are rejected. The DS4
+  touchpad virtual mouse is disabled and safely ignored if it is still reported.
 - There is no need to hold R1 to drive.
 
 Stopping means setting PWM outputs to zero. The wheels may continue moving due
@@ -168,6 +168,8 @@ Verified on 9 September 2026:
   deadband, analog output limits, mixing, D-pad priority, release-to-stop without
   Cross, neutral arming, Cross stop, timeout including a new report after a long
   gap, controller ownership, and `millis()` rollover.
+- DS4 virtual touchpad registration is ignored without disconnecting the parent
+  gamepad. This prevents the brief blue-light connection seen in the first build.
 - **Not yet tested on hardware:** board upload, PS4 pairing, motor direction,
   supply performance, and actual stopping time.
 

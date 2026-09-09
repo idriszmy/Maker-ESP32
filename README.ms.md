@@ -85,8 +85,8 @@ atas + bawah dihentikan oleh kod.
 - Syarat neutral yang sama digunakan selepas startup, reconnect atau timeout.
 - Tiada data baru daripada controller aktif selama **300 ms**: motor dihentikan.
 - Controller disconnect: motor dihentikan apabila disconnect dikesan.
-- Hanya satu gamepad diterima; controller tambahan ditolak. Touchpad virtual
-  mouse dimatikan.
+- Hanya satu gamepad diterima; gamepad tambahan ditolak. Virtual mouse daripada
+  touchpad DS4 dimatikan dan diabaikan dengan selamat jika masih dilaporkan.
 - Tidak perlu tahan R1 untuk memandu.
 
 Stop bermaksud output PWM menjadi sifar. Roda mungkin masih bergerak kerana
@@ -168,6 +168,8 @@ Disahkan pada 9 September 2026:
   neutral arming, Cross stop,
   timeout termasuk laporan baru selepas sela panjang, controller ownership dan
   `millis()` rollover.
+- Pendaftaran virtual touchpad DS4 diabaikan tanpa memutuskan gamepad induk.
+  Ini mengelakkan sambungan lampu biru sekejap yang berlaku pada build pertama.
 - **Belum diuji pada hardware:** upload ke board, pairing PS4, arah motor,
   prestasi bekalan dan masa berhenti sebenar.
 
